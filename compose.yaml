@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: tracker
+      POSTGRES_PASSWORD: trackerpass
+      POSTGRES_DB: trackerdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tracker -d trackerdb"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
+
+  mock-api:
+    build: ./mock-api
+    ports:
+      - "8001:8000"
+
+  web-api:
+    build: ./web-api
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://tracker:trackerpass@postgres:5432/trackerdb
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  checker:
+    build: ./checker
+    profiles: ["jobs"]
+    environment:
+      DATABASE_URL: postgresql://tracker:trackerpass@postgres:5432/trackerdb
+      MOCK_API_URL: http://mock-api:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:

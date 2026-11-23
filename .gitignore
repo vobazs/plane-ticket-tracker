@@ -1,0 +1,14 @@
+# Titkos kulcsok
+k8s/secret.yaml
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS / Editor
+.DS_Store
+.vscode/
+.idea/
